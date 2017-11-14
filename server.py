@@ -1,13 +1,8 @@
 import socket
+from route import *
 
 
-host = '0.0.0.0'
-port = 233
-s = socket.socket()
-s.bind((host, port))
-while True:
-    s.listen(5)
-    connection, ip = s.accept()
+def obtain_data(connection):
     request = b''
     buffer_size = 1024
     while True:
@@ -15,7 +10,23 @@ while True:
         request += r
         if len(r) < buffer_size:
             break
-    print('ip:{}\nrequest:{}'.format(ip, request.decode('utf-8')))
-    response = b'HTTP/1.1 200 OK\r\n\r\n<h1>Hello World!</h1>'
-    connection.sendall(response)
-    connection.close()
+    return request
+
+
+def run(host, port):
+    with socket.socket() as s:
+        s.bind((host, port))
+        s.listen()
+        while True:
+            connection, ip = s.accept()
+            r = obtain_data(connection)
+            if len(r) <= 0:
+                print('浏览器又蛋疼了')
+            else:
+                response = response_for_path(r.decode('utf-8'))
+                connection.sendall(response)
+            connection.close()
+
+
+if __name__ == '__main__':
+    run('0.0.0.0', 233)
