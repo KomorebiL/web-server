@@ -38,6 +38,7 @@ class Model:
         }
         cls.db[name].update_one(query, values)
 
+
     @classmethod
     def find(cls, **kwargs):
         name = cls.__name__
@@ -59,6 +60,9 @@ class Model:
     @classmethod
     def all(cls):
         return cls.find()
+
+    def get(self, key):
+        return self.__dict__.get(key)
 
     def __repr__(self):
         lt = ['{} = {}'.format(k, v) for k, v in self.__dict__.items()]

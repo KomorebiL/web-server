@@ -4,20 +4,33 @@ class request:
         self.body = ''
         self.path = ''
         self.query = {}
+        self.cookies = {}
+        self.headers = {}
         self.form(header)
 
     def get(self, name):
         return self.__dict__.get(name)
 
     def form(self, header):
-        analyze = self._body(header).split('\r\n')
-        r_line, head = analyze[0], analyze[1:]
+        r_line, *head = self._body(header).split('\r\n')
+        self._headers(head)
         self._respond(r_line)
-        # for h in head:
-        #     analyze = h.split(':', 1)
-        #     key, value = analyze[0], analyze[1]
-        #     self.__dict__[key] = value
+        self._cookie()
         return self.__dict__
+
+    def _headers(self, header):
+        for h in header:
+            key, value = h.split(':', 1)
+            self.headers[key] = value
+
+    def _cookie(self):
+        cookies = self.headers.get('Cookie', None)
+        if cookies is not None:
+            cs = cookies.split('; ')
+            for c in cs:
+                if '=' in c:
+                    k, v = c.split('=', 1)
+                    self.cookies[k] = v
 
     def _respond(self, respond_line):
         data = respond_line.split()
@@ -26,7 +39,15 @@ class request:
 
     def _body(self, header):
         header, body = header.split('\r\n\r\n', 1)
-        self.body = body
+        if len(body) <= 0:
+            self.body = body
+        else:
+            args = body.split('&')
+            query = {}
+            for arg in args:
+                k, v = arg.split('=')
+                query[k] = v
+            self.body = query
         return header
 
     def _path_and_query(self, header):
@@ -45,4 +66,7 @@ class request:
             self.query = query
 
     def __repr__(self):
-        return str(self.__dict__)
+        string = ''
+        for k, v in self.__dict__.items():
+            string += '{}: {}\n'.format(k, v)
+        return string

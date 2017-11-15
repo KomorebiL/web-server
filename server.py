@@ -1,5 +1,8 @@
 import socket
-from route import *
+import request
+from routes import error
+import routes.route
+import routes.api_route
 
 
 def obtain_data(connection):
@@ -11,6 +14,20 @@ def obtain_data(connection):
         if len(r) < buffer_size:
             break
     return request
+
+
+def response_for_path(r):
+    requests = request.request(r)
+    path = requests.get('path')
+    rs = {}
+    us = [
+        routes.route.route_dict(),
+        routes.api_route.route_dict(),
+    ]
+    for u in us:
+        rs.update(u)
+    route = rs.get(path, error)
+    return route(requests)
 
 
 def run(host, port):
@@ -29,4 +46,8 @@ def run(host, port):
 
 
 if __name__ == '__main__':
-    run('0.0.0.0', 233)
+    config = {
+        'host': '0.0.0.0',
+        'port': 233,
+    }
+    run(**config)
