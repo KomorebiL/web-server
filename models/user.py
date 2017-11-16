@@ -9,6 +9,7 @@ class User(Model):
             ('username', str, ''),
             ('password', str, ''),
             ('cookie', str, ''),
+            ('head', str, '1.jpg')
         ]
         return names
 

@@ -22,16 +22,30 @@ def response_with_headers(code, headers):
     header += ''.join([
         '{}: {}\r\n'.format(k, v) for k, v in headers.items()
     ])
-    return header
+    return header + '\r\n'
 
 
 def validate_login(f):
     def vailedate(requests):
         u = obtain_user(requests)
         if len(u) > 0:
+            form = {
+                'ip': requests.ip
+            }
+            u[0].update(u[0].id, form)
             return f(requests)
         else:
             return redirect('/login')
+    return vailedate
+
+
+def validate_login_redirect(f):
+    def vailedate(requests):
+        u = obtain_user(requests)
+        if len(u) > 0:
+            return redirect('/')
+        else:
+            return f(requests)
     return vailedate
 
 
@@ -55,3 +69,50 @@ def redirect(url, header=None):
         headers.update(header)
     r = response_with_headers(302, headers) + '\r\n'
     return r.encode()
+
+
+def template(name, **kwargs):
+    path = 'htmls/{}.html'.format(name)
+    with open(path, 'r', encoding='utf-8') as f:
+        r = f.read()
+    if len(kwargs) > 0:
+        for k, v in kwargs.items():
+            name = '{{' + str(k) + '}}'
+            r = r.replace(name, kwargs[k])
+    return r
+
+
+def cover(requests):
+    cover_name = requests.query.get('img', None)
+    if cover_name is None:
+        return error(requests)
+    else:
+        postfix = cover_name.split('.', 1)[1]
+        path = 'covers/' + cover_name
+        headers = {
+            'Content-Type': 'image/{}'.format(postfix)
+        }
+        with open(path, 'rb') as f:
+            header = response_with_headers(200, headers)
+            data = bytes(header, encoding="utf-8") + f.read()
+            return data
+
+
+def static(requests):
+    file_name = requests.query.get('file', None)
+    if file_name is None:
+        return error(requests)
+    else:
+        postfix = file_name.split('.', 1)[1]
+        path = 'static/' + file_name
+        if postfix == 'css':
+            type_ = 'text/css'
+        else:
+            type_ = 'application/x-javascript'
+        headers = {
+            'Content-Type': type_
+        }
+        with open(path, 'rb') as f:
+            header = response_with_headers(200, headers)
+            data = bytes(header, encoding="utf-8") + f.read()
+            return data

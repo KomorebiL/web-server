@@ -1,7 +1,7 @@
 import socket
 import request
 from routes import error
-import routes.route
+import routes.route_index
 import routes.api_route
 
 
@@ -16,12 +16,13 @@ def obtain_data(connection):
     return request
 
 
-def response_for_path(r):
+def response_for_path(r, ip):
     requests = request.request(r)
+    requests.ip = str(ip[0])
     path = requests.get('path')
     rs = {}
     us = [
-        routes.route.route_dict(),
+        routes.route_index.route_dict(),
         routes.api_route.route_dict(),
     ]
     for u in us:
@@ -40,7 +41,7 @@ def run(host, port):
             if len(r) <= 0:
                 print('浏览器又蛋疼了')
             else:
-                response = response_for_path(r.decode('utf-8'))
+                response = response_for_path(r.decode('utf-8'), ip)
                 connection.sendall(response)
             connection.close()
 

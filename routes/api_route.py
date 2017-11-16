@@ -1,9 +1,10 @@
 from models.user import User
 from uuid import uuid4
-from utils import *
 from routes import (
     error,
     redirect,
+    cover,
+    static,
 )
 
 
@@ -44,9 +45,28 @@ def api_register(requests):
         return error(requests)
 
 
+def api_quit(requests):
+    headers = {
+        'Set-cookie': 'session_id={}; path=/'.format('')
+    }
+    return redirect('/', headers)
+
+
+def api_cover(requests):
+    if requests.get('method') == 'POST':
+        print(requests)
+        return redirect('/')
+    else:
+        return error(requests)
+
+
 def route_dict():
     d = {
         '/api/login': api_login,
         '/api/register': api_register,
+        '/api/quit': api_quit,
+        '/api/add_head': api_cover,
+        '/cover': cover,
+        '/static': static,
     }
     return d

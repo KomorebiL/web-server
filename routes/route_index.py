@@ -1,11 +1,12 @@
 from models.user import User
-from utils import template
 from routes import (
     response_with_headers,
     obtain_user,
     error,
     redirect,
     validate_login,
+    template,
+    validate_login_redirect,
 )
 
 
@@ -16,28 +17,30 @@ def route_index(requests):
     }
     header = response_with_headers(200, headers)
     u = obtain_user(requests)[0]
-    body = '<h1>Hello {}!</h1>'.format(u.username)
-    data = header + '\r\n\r\n' + body
+    body = template('index', username=u.username, head=u.head, ip=u.ip)
+    data = header + body
     return data.encode(encoding='utf-8')
 
 
+@validate_login_redirect
 def route_login(requests):
     headers = {
         'Content-Type': 'text/html',
     }
     header = response_with_headers(200, headers)
     body = template('login')
-    data = header + '\r\n' + body
+    data = header + body
     return data.encode(encoding='utf-8')
 
 
+@validate_login_redirect
 def route_register(requests):
     headers = {
         'Content-Type': 'text/html',
     }
     header = response_with_headers(200, headers)
     body = template('register')
-    data = header + '\r\n' + body
+    data = header + body
     return data.encode(encoding='utf-8')
 
 
