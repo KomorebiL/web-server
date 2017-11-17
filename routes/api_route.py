@@ -5,6 +5,7 @@ from routes import (
     redirect,
     cover,
     static,
+    obtain_user,
 )
 
 
@@ -54,7 +55,18 @@ def api_quit(requests):
 
 def api_cover(requests):
     if requests.get('method') == 'POST':
-        print(requests)
+        u = obtain_user(requests)[0]
+        n = requests.get('file_headers').get('filename')
+        file_name = '{}.{}'.format(u.username, n.split('.')[1])
+
+        path = 'covers/' + file_name
+        data = requests.get('body')
+        with open(path, 'wb') as f:
+            f.write(data)
+        form = {
+            'head': file_name,
+        }
+        User.update(u.id, form)
         return redirect('/')
     else:
         return error(requests)

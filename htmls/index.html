@@ -1,21 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>吃瓜主页</title>
-        <link rel="stylesheet" href="static?file=index.css" media="screen" title="no title" charset="utf-8">
-    </head>
-    <body>
-        <h1>Hello {{username}}</h1>
-        <form method='post' action='/api/add_head' enctype='multipart/form-data'>
-            <input type='file' name=cover'>
-            <button type="submit">Upload</button>
-        </form>
-        <img class="head" src="/cover?img={{head}}">
-        <p>登录ip : {{ip}}</p></br>
-        <a href="/login">Login</a>
-        <a href="/todo">Todo</a>
-        <a href="/api/quit">Quit</a></br>
-
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <title>吃瓜主页</title>
+    <link rel="stylesheet" href="static?file=index.css">
+</head>
+<img>
+    <h1>Hello {{username}}</h1>
+    <img class="head" src="/cover?img={{head}}">
+    <p>当前ip为： {{ip}}</p></br>
+    <a href="/login">Login</a>
+    <a href='/todo'>Todo</a>
+    <a href="/api/quit">quit</a>
+    <form method='post' action='/api/add_head' enctype='multipart/form-data'>
+        <input type='file' name='cover'>
+        <button type="submit">Upload</button>
+    </form>
+</body>
 </html>

@@ -17,7 +17,10 @@ class Model:
             n, f, v = name
             if n in form:
                 setattr(m, n, f(form[n]))
+            else:
+                setattr(m, n, v)
         m.save()
+        return m.__dict__
 
     @classmethod
     def delete(cls, id):
@@ -55,6 +58,7 @@ class Model:
         for key in bson:
             setattr(m, key, bson[key])
         m.id = str(bson['_id'])
+        m.__dict__.pop('_id')
         return m
 
     @classmethod

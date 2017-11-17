@@ -1,5 +1,6 @@
 import request
 from models.user import User
+import json
 
 
 def error(requests):
@@ -116,3 +117,13 @@ def static(requests):
             header = response_with_headers(200, headers)
             data = bytes(header, encoding="utf-8") + f.read()
             return data
+
+
+def json_response(data):
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    header = response_with_headers(200, headers)
+    body = json.dumps(data, ensure_ascii=False)
+    data = header + body
+    return data.encode(encoding='utf-8')

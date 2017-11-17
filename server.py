@@ -1,29 +1,38 @@
 import socket
 import request
+import _thread
 from routes import error
 import routes.route_index
+import routes.route_todo
 import routes.api_route
 
 
-def obtain_data(connection):
-    request = b''
+def obtain_data(connection, ip):
+    rs = b''
     buffer_size = 1024
     while True:
         r = connection.recv(buffer_size)
-        request += r
+        rs += r
         if len(r) < buffer_size:
             break
-    return request
+    if len(r) <= 0:
+        print('浏览器又蛋疼了')
+    else:
+        response = response_for_path(rs, ip)
+        # response = response_for_path(rs.decode('utf-8'), ip)
+        connection.sendall(response)
+    connection.close()
 
 
 def response_for_path(r, ip):
-    requests = request.request(r)
+    requests = request.Request(r)
     requests.ip = str(ip[0])
     path = requests.get('path')
     rs = {}
     us = [
         routes.route_index.route_dict(),
         routes.api_route.route_dict(),
+        routes.route_todo.route_dict()
     ]
     for u in us:
         rs.update(u)
@@ -37,13 +46,7 @@ def run(host, port):
         s.listen()
         while True:
             connection, ip = s.accept()
-            r = obtain_data(connection)
-            if len(r) <= 0:
-                print('浏览器又蛋疼了')
-            else:
-                response = response_for_path(r.decode('utf-8'), ip)
-                connection.sendall(response)
-            connection.close()
+            _thread.start_new_thread(obtain_data, (connection, ip))
 
 
 if __name__ == '__main__':
