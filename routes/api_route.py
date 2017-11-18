@@ -57,16 +57,14 @@ def api_cover(requests):
     if requests.get('method') == 'POST':
         u = obtain_user(requests)[0]
         n = requests.get('file_headers').get('filename')
-        file_name = '{}.{}'.format(u.username, n.split('.')[1])
+        cover_type = n.split('.')[1]
+        if cover_type in ['jpg', 'png']:
+            file_name = '{}.{}'.format(u.username, cover_type)
 
-        path = 'covers/' + file_name
-        data = requests.get('body')
-        with open(path, 'wb') as f:
-            f.write(data)
-        form = {
-            'head': file_name,
-        }
-        User.update(u.id, form)
+            path = 'covers/' + file_name
+            data = requests.get('body')
+            with open(path, 'wb') as f:
+                f.write(data)
         return redirect('/')
     else:
         return error(requests)

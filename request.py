@@ -1,3 +1,6 @@
+import json
+
+
 class Request:
     def __init__(self, r):
         self.method = ''
@@ -32,7 +35,7 @@ class Request:
 
     def _headers(self, header):
         for h in header:
-            key, value = h.split(':', 1)
+            key, value = h.split(': ', 1)
             self.headers[key] = value
 
     def _cookie(self):
@@ -53,18 +56,51 @@ class Request:
         if len(body) <= 0:
             self.body = {}
         else:
-            type_ = self.headers.get('Content-Type')
-            if type_[:20] != ' multipart/form-data':
-                args = body.split('&')
-                query = {}
-                for arg in args:
-                    k, v = arg.split('=')
-                    query[k] = v
-                self.body = query
+            key = self.headers.get('Content-Type')
+            if key[:19] == 'multipart/form-data':
+                self._file_data(body)
             else:
-                file_header, file_body = self._split(body)
-                self._file_header(file_header)
-                self.body = file_body
+                self.function_table(key, body)
+            # if type_[:19] != 'multipart/form-data':
+            #     args = body.decode('utf-8').split('&')
+            #     query = {}
+            #     for arg in args:
+            #         k, v = arg.split('=')
+            #         query[k] = v
+            #     self.body = query
+            # else:
+            #     file_header, file_body = self._split(body)
+            #     self._file_header(file_header)
+            #     self.body = file_body
+
+    def function_table(self, key, body):
+        d = {
+            'multipart/form-data': self._file_data,
+            'application/json': self._json_data,
+        }
+        f = d.get(key, self._usually_data)
+        return f(body)
+
+    def _file_data(self, body):
+        file_header, file_body = self._split(body)
+        self._file_header(file_header)
+        self.body = file_body
+
+    def _json_data(self, body):
+        b = body.decode('utf-8')
+        data = json.loads(b)
+        query = {}
+        for k, v in data.items():
+            query[k] = v
+        self.body = query
+
+    def _usually_data(self, body):
+        args = body.decode('utf-8').split('&')
+        query = {}
+        for arg in args:
+            k, v = arg.split('=')
+            query[k] = v
+        self.body = query
 
     def _file_header(self, headers):
         headers = headers.split('\r\n')[1].split(';')

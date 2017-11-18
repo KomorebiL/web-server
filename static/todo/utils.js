@@ -7,7 +7,7 @@ const e = t => document.querySelector(t)
 const es = t => document.querySelectorAll(t)
 
 const ajax = function(method, path, data, responseCallback) {
-    var r = new XMLHttpRequest()
+    let r = new XMLHttpRequest()
     r.open(method, path, true)
     r.setRequestHeader('Content-Type', 'application/json')
     r.onreadystatechange = function() {

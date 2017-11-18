@@ -26,11 +26,10 @@ def route_index(requests):
 @validate_login
 def api_all(requests):
     u = obtain_user(requests)[0]
-    if requests.get('method') == 'POST':
-        print(requests)
+    if requests.get('method') == 'GET':
         form = {
             'user_id': u.id,
-            'state': requests.get('body').get('state'),
+            'state': requests.get('query').get('state'),
         }
         ts = Todo.find(**form)
         data = [t.__dict__ for t in ts]
@@ -50,7 +49,7 @@ def api_add(requests):
         t = Todo.new(form)
         data = {
             'content': t.get('content'),
-            'state': t.get('state'),
+            'id': t.get('id'),
         }
         return json_response(data)
     else:
@@ -67,6 +66,7 @@ def api_update(requests):
             'state': state,
         }
         Todo.update(id, u.id, form)
+        return json_response('ok')
     else:
         return error(requests)
 
@@ -76,10 +76,11 @@ def api_delete(requests):
     u = obtain_user(requests)[0]
     if requests.get('method') == 'POST':
         form = {
-            'userid': u.id,
-            'id': requests.get('body').get('delete')
+            'user_id': u.id,
+            'id': requests.get('body').get('id')
         }
         Todo.delete(**form)
+        return json_response('ok')
     else:
         return error(requests)
 
@@ -90,5 +91,6 @@ def route_dict():
         '/api/todo/add': api_add,
         '/api/todo/delete': api_delete,
         '/api/todo/all': api_all,
+        '/api/todo/update': api_update,
     }
     return d

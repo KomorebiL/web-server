@@ -13,16 +13,17 @@ def error(requests):
     return data.encode(encoding='utf-8')
 
 
-def response_with_headers(code, headers):
+def response_with_headers(code, headers=None):
     codes = {
         200: 'HTTP/1.1 200 OK\r\n',
         404: 'HTTP/1.1 404 NOT FOUND\r\n',
         302: 'HTTP/1.1 302\r\n'
     }
     header = codes[code]
-    header += ''.join([
-        '{}: {}\r\n'.format(k, v) for k, v in headers.items()
-    ])
+    if headers is not None:
+        header += ''.join([
+            '{}: {}\r\n'.format(k, v) for k, v in headers.items()
+        ])
     return header + '\r\n'
 
 
