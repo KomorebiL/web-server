@@ -1,6 +1,11 @@
 import request
 from models.user import User
 import json
+import redis
+import uuid
+
+
+r = redis.StrictRedis(charset="utf-8", decode_responses=True)
 
 
 def error(requests):
@@ -31,10 +36,6 @@ def validate_login(f):
     def vailedate(requests):
         u = obtain_user(requests)
         if len(u) > 0:
-            form = {
-                'ip': requests.ip
-            }
-            u[0].update(u[0].id, form)
             return f(requests)
         else:
             return redirect('/login')
@@ -49,6 +50,29 @@ def validate_login_redirect(f):
         else:
             return f(requests)
     return vailedate
+
+
+def validate_token(f):
+    def validate(requests):
+        u = obtain_user(requests)
+        if len(u) > 0:
+            token = requests.get('body').get('token')
+            if r.exists(token) and r.get(token) == u[0].id:
+                r.delete(token)
+                print('true')
+                return f(requests)
+            else:
+                print('false')
+                return bytes(response_with_headers(404), encoding='utf-8')
+        else:
+            return redirect('/login')
+    return validate
+
+
+def new_token(requests):
+    token = str(uuid.uuid4())
+    r.set(token, obtain_user(requests)[0].id, 18000)
+    return token
 
 
 def obtain_user(requests):
@@ -69,19 +93,19 @@ def redirect(url, header=None):
     }
     if header is not None:
         headers.update(header)
-    r = response_with_headers(302, headers) + '\r\n'
-    return r.encode()
+    h = response_with_headers(302, headers) + '\r\n'
+    return h.encode()
 
 
 def template(name, **kwargs):
     path = 'htmls/{}.html'.format(name)
     with open(path, 'r', encoding='utf-8') as f:
-        r = f.read()
+        data = f.read()
     if len(kwargs) > 0:
         for k, v in kwargs.items():
             name = '{{' + str(k) + '}}'
-            r = r.replace(name, kwargs[k])
-    return r
+            data = data.replace(name, kwargs[k])
+    return data
 
 
 def cover(requests):

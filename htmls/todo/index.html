@@ -9,6 +9,7 @@
         <div id='header'>
             <div class='mie-bar'>
                 <form action="/api/todo/add" method="POST">
+                    <input id='csrf_token' type='hidden' name='token' value='{{token}}'>
                     <label id='komorebi' for='text'>Komorebi</label>
                     <input id='text' type='text' name='content' placeholder="添加ToDo~" required="required" autocomplete='off'>
                 </form>

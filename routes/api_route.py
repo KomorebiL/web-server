@@ -21,6 +21,7 @@ def api_login(requests):
             cookie_id = str(uuid4())
             cookie_data = {
                 'cookie': cookie_id,
+                'ip': requests.ip,
             }
             User.update(u_id, cookie_data)
             headers = {
@@ -65,6 +66,10 @@ def api_cover(requests):
             data = requests.get('body')
             with open(path, 'wb') as f:
                 f.write(data)
+            form = {
+                'head': file_name,
+            }
+            User.update(u.id, form)
         return redirect('/')
     else:
         return error(requests)

@@ -6,9 +6,11 @@ from routes import (
     error,
     redirect,
     validate_login,
-    template,
     validate_login_redirect,
+    validate_token,
+    template,
     json_response,
+    new_token,
 )
 
 
@@ -18,7 +20,8 @@ def route_index(requests):
         'Content-Type': 'text/html',
     }
     header = response_with_headers(200, headers)
-    body = template('todo/index')
+    token = new_token(requests)
+    body = template('todo/index', token=token)
     data = header + body
     return data.encode(encoding='utf-8')
 
@@ -38,7 +41,7 @@ def api_all(requests):
         return error(requests)
 
 
-@validate_login
+@validate_token
 def api_add(requests):
     u = obtain_user(requests)[0]
     if requests.get('method') == 'POST':
@@ -50,13 +53,14 @@ def api_add(requests):
         data = {
             'content': t.get('content'),
             'id': t.get('id'),
+            'token': new_token(requests),
         }
         return json_response(data)
     else:
         return error(requests)
 
 
-@validate_login
+@validate_token
 def api_update(requests):
     u = obtain_user(requests)[0]
     if requests.get('method') == 'POST':
@@ -66,12 +70,15 @@ def api_update(requests):
             'state': state,
         }
         Todo.update(id, u.id, form)
-        return json_response('ok')
+        data = {
+            'token': new_token(requests)
+        }
+        return json_response(data)
     else:
         return error(requests)
 
 
-@validate_login
+@validate_token
 def api_delete(requests):
     u = obtain_user(requests)[0]
     if requests.get('method') == 'POST':
@@ -80,7 +87,10 @@ def api_delete(requests):
             'id': requests.get('body').get('id')
         }
         Todo.delete(**form)
-        return json_response('ok')
+        data = {
+            'token': new_token(requests)
+        }
+        return json_response(data)
     else:
         return error(requests)
 

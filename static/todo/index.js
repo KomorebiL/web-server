@@ -11,16 +11,28 @@ const apiTodoAll = function(form, callback) {
 
 const apiTodoAdd = function(form, callback) {
     let path = '/api/todo/add'
+    let d = {
+        'token': e('#csrf_token').value,
+    }
+    form = Object.assign(form, d)
     ajax('POST', path, form, callback)
 }
 
 const apiTodoDelete = function(form, callback) {
     let path = '/api/todo/delete'
+    let d = {
+        'token': e('#csrf_token').value,
+    }
+    form = Object.assign(form, d)
     ajax('POST', path, form, callback)
 }
 
 const apiTodoUpdate = function(form, callback) {
     let path = '/api/todo/update'
+    let d = {
+        'token': e('#csrf_token').value,
+    }
+    form = Object.assign(form, d)
     ajax('POST', path, form, callback)
 }
 
@@ -100,7 +112,6 @@ const bindEventTodoList = function() {
     let addButton = e('#my-list')
     addButton.addEventListener('click', function(event) {
         let classname = event.target.className
-        log(classname)
         functionTable(classname, event.target)
     })
 }
@@ -115,9 +126,11 @@ const functionTable = function(classname, target) {
             'id': id,
             'state': state,
         }
-        apiTodoUpdate(form, function() {
+        apiTodoUpdate(form, function(r) {
             append(content, id)
             p.remove()
+            let data = JSON.parse(r)
+            e('#csrf_token').value = data['token']
         })
     }
 
@@ -147,9 +160,11 @@ const functionTable = function(classname, target) {
         let form = {
             'id': id,
         }
-        apiTodoDelete(form, function() {
+        apiTodoDelete(form, function(r) {
             p.remove()
             scaler('#dele', '-')
+            let data = JSON.parse(r)
+            e('#csrf_token').value = data['token']
         })
     }
 
