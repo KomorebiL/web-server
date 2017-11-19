@@ -1,4 +1,5 @@
 import json
+import urllib.parse
 
 
 class Request:
@@ -61,17 +62,6 @@ class Request:
                 self._file_data(body)
             else:
                 self.function_table(key, body)
-            # if type_[:19] != 'multipart/form-data':
-            #     args = body.decode('utf-8').split('&')
-            #     query = {}
-            #     for arg in args:
-            #         k, v = arg.split('=')
-            #         query[k] = v
-            #     self.body = query
-            # else:
-            #     file_header, file_body = self._split(body)
-            #     self._file_header(file_header)
-            #     self.body = file_body
 
     def function_table(self, key, body):
         d = {
@@ -98,6 +88,7 @@ class Request:
         args = body.decode('utf-8').split('&')
         query = {}
         for arg in args:
+            arg = urllib.parse.unquote_plus(arg)
             k, v = arg.split('=')
             query[k] = v
         self.body = query

@@ -168,7 +168,7 @@ const functionTable = function(classname, target) {
         })
     }
 
-    return o[classname](target)
+    return o[classname] && o[classname](target)
 }
 
 const buttonDisplay = function(id, disid) {
@@ -196,6 +196,28 @@ const scaler = function(id, op) {
     }
 }
 
+const addsubmit = function() {
+    let form_ = e('form')
+    form_.addEventListener('keypress', function(event) {
+        if (event.key == 'Enter') {
+            event.preventDefault()
+            let div = document.createElement('div')
+            div.textContent = e('#text').value
+            let form = {
+                'content': div.textContent,
+            }
+            apiTodoAdd(form, function(r) {
+                let data = JSON.parse(r)
+                let id = data.id
+                let content = data.content
+                e('#csrf_token').value = data['token']
+                e('#text').value = ''
+                appendTodoEnd(content, id)
+            })
+        }
+    })
+}
+
 const addTodos = function() {
     allData('todo', appendTodoEnd)
     allData('done', appendDoneEnd)
@@ -210,6 +232,7 @@ const addButtonDisplay = function() {
 
 const main = function() {
     addTodos()
+    addsubmit()
     bindEventTodoList()
     addButtonDisplay()
 }

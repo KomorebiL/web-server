@@ -25,7 +25,7 @@ def api_login(requests):
             }
             User.update(u_id, cookie_data)
             headers = {
-                'Set-cookie': 'session_id={}; path=/'.format(cookie_id)
+                'Set-cookie': 'session_id={}; path=/; httponly=true;'.format(cookie_id)
             }
             return redirect('/', headers)
         else:

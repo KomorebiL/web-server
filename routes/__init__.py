@@ -59,10 +59,8 @@ def validate_token(f):
             token = requests.get('body').get('token')
             if r.exists(token) and r.get(token) == u[0].id:
                 r.delete(token)
-                print('true')
                 return f(requests)
             else:
-                print('false')
                 return bytes(response_with_headers(404), encoding='utf-8')
         else:
             return redirect('/login')
@@ -78,8 +76,6 @@ def new_token(requests):
 def obtain_user(requests):
     cookies = requests.get('cookies')
     cookie = cookies.get('session_id', None)
-    if cookie is None:
-        cookie = cookies.get(' session_id')
     form = {
         'cookie': cookie,
     }
