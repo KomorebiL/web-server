@@ -36,62 +36,64 @@ const apiTodoUpdate = function(form, callback) {
     ajax('POST', path, form, callback)
 }
 
-const bindTextdo = function(textValue, id) {
+const bindTextdo = function(id) {
     let t = `
     <div class='mie-list mie-do' data-id=${id}>
         <input class='box-do' type='checkbox'>
-        <p class='pt'>${textValue}</p>
+        <p class='pt'></p>
         <button class='button-do'>丢弃</button>
     </div>`
     return t
 }
 
-const bindTextdone = function(textValue, id) {
+const bindTextdone = function(id) {
     let t = `
     <div class='mie-list mie-done' data-id=${id}>
         <input class='box-done' type='checkbox' checked='checked'>
-        <p class='pt'>${textValue}</p>
+        <p class='pt'></p>
         <button class='button-done'>删除</button>
     </div>
     `
     return t
 }
 
-const bindTextdele = function(textValue, id) {
+const bindTextdele = function(id) {
     let t = `
     <div class='mie-list mie-dele' data-id=${id}>
         <span> </span>
-        <p class='pt'>${textValue}</p>
+        <p class='pt'></p>
         <button class='button-delete'>删除</button>
     </div>
     `
     return t
 }
 
-const appendListEnd = function(text, id) {
+const appendListEnd = function(div, id, content) {
     let t = e(id)
-    t.insertAdjacentHTML('beforeEnd', text)
+    t.insertAdjacentHTML('beforeEnd', div)
+    let texts = t.querySelectorAll('.pt')
+    texts[texts.length-1].textContent = content
 }
 
 // 插入到正在进行后面
 const appendTodoEnd = function(content, id) {
-    let text = bindTextdo(content, id)
+    let div = bindTextdo(id)
     scaler('#todo', '+')
-    appendListEnd(text, '#list-todo')
+    appendListEnd(div, '#list-todo', content)
 }
 
 // 插入到已完成后面
 const appendDoneEnd = function(content, id) {
-    let text = bindTextdone(content, id)
+    let div = bindTextdone(id)
     scaler('#done', '+')
-    appendListEnd(text, '#list-done')
+    appendListEnd(div, '#list-done', content)
 }
 
 // 插入到垃圾桶后面
 const appendDeleEnd = function(content, id) {
-    let text = bindTextdele(content, id)
+    let div = bindTextdele(id)
     scaler('#dele', '+')
-    appendListEnd(text, '#dele-list')
+    appendListEnd(div, '#dele-list', content)
 }
 
 const allData = function(state, append) {
@@ -201,10 +203,9 @@ const addsubmit = function() {
     form_.addEventListener('keypress', function(event) {
         if (event.key == 'Enter') {
             event.preventDefault()
-            let div = document.createElement('div')
-            div.textContent = e('#text').value
+            let value = e('#text').value
             let form = {
-                'content': div.textContent,
+                'content': value,
             }
             apiTodoAdd(form, function(r) {
                 let data = JSON.parse(r)

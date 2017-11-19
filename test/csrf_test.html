@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form id="form" method="post" action="http://localhost:233/api/todo/add">
+    <input name='content' value="test">
+    <input id="add" type="submit" value="提交">
+</form>
+<script>
+    var e = function(sel) {
+        return document.querySelector(sel)
+    }
+    e('#add').click()
+</script>
+</body>
+</html>
