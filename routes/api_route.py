@@ -8,6 +8,7 @@ from routes import (
     obtain_user,
     set_cookie,
     validate_login,
+    response_with_headers,
 )
 
 
@@ -78,12 +79,23 @@ def api_cover(requests):
         return error(requests)
 
 
+def api_favicon(requests):
+    headers = {
+        'Content-Type': 'image/x-icon',
+    }
+    with open('favicon.ico', 'rb') as f:
+        header = response_with_headers(200, headers)
+        data = bytes(header, encoding="utf-8") + f.read()
+        return data
+
+
 def route_dict():
     d = {
         '/api/login': api_login,
         '/api/register': api_register,
         '/api/quit': api_quit,
         '/api/add_head': api_cover,
+        '/favicon.ico': api_favicon,
         '/cover': cover,
         '/static': static,
     }
