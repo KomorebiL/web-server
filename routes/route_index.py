@@ -16,7 +16,7 @@ def route_index(requests):
         'Content-Type': 'text/html',
     }
     header = response_with_headers(200, headers)
-    u = obtain_user(requests)[0]
+    u = obtain_user(requests)
     body = template('index', username=u.username, head=u.head, ip=u.ip)
     data = header + body
     return data.encode(encoding='utf-8')

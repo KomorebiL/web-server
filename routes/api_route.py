@@ -6,6 +6,8 @@ from routes import (
     cover,
     static,
     obtain_user,
+    set_cookie,
+    validate_login,
 )
 
 
@@ -19,14 +21,14 @@ def api_login(requests):
         if User.validate_login(**user_data):
             u_id = User.find(**user_data)[0].id
             cookie_id = str(uuid4())
-            cookie_data = {
-                'cookie': cookie_id,
+            ip_data = {
                 'ip': requests.ip,
             }
-            User.update(u_id, cookie_data)
+            User.update(u_id, ip_data)
             headers = {
                 'Set-cookie': 'session_id={}; path=/; httponly=true;'.format(cookie_id)
             }
+            set_cookie(cookie_id, u_id)
             return redirect('/', headers)
         else:
             return error(requests)
@@ -54,9 +56,10 @@ def api_quit(requests):
     return redirect('/', headers)
 
 
+@validate_login
 def api_cover(requests):
     if requests.get('method') == 'POST':
-        u = obtain_user(requests)[0]
+        u = obtain_user(requests)
         n = requests.get('file_headers').get('filename')
         cover_type = n.split('.')[1]
         if cover_type in ['jpg', 'png']:

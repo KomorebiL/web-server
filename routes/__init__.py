@@ -35,7 +35,7 @@ def response_with_headers(code, headers=None):
 def validate_login(f):
     def vailedate(requests):
         u = obtain_user(requests)
-        if len(u) > 0:
+        if u is not None:
             return f(requests)
         else:
             return redirect('/login')
@@ -45,7 +45,7 @@ def validate_login(f):
 def validate_login_redirect(f):
     def vailedate(requests):
         u = obtain_user(requests)
-        if len(u) > 0:
+        if u is not None:
             return redirect('/')
         else:
             return f(requests)
@@ -55,9 +55,9 @@ def validate_login_redirect(f):
 def validate_token(f):
     def validate(requests):
         u = obtain_user(requests)
-        if len(u) > 0:
+        if u is not None:
             token = requests.get('body').get('token')
-            if r.exists(token) and r.get(token) == u[0].id:
+            if r.exists(token) and r.get(token) == u.id:
                 r.delete(token)
                 return f(requests)
             else:
@@ -69,18 +69,17 @@ def validate_token(f):
 
 def new_token(requests):
     token = str(uuid.uuid4())
-    r.set(token, obtain_user(requests)[0].id, 18000)
+    r.set(token, obtain_user(requests).id, 18000)
     return token
 
 
 def obtain_user(requests):
     cookies = requests.get('cookies')
     cookie = cookies.get('session_id', None)
-    form = {
-        'cookie': cookie,
-    }
-    u = User.find(**form)
-    return u
+    u = get_cookie_id(cookie)
+    if u is not None:
+        return User.find(id=u)[0]
+    return None
 
 
 def redirect(url, header=None):
@@ -148,3 +147,14 @@ def json_response(data):
     body = json.dumps(data, ensure_ascii=False)
     data = header + body
     return data.encode(encoding='utf-8')
+
+
+def set_cookie(cookie, user_id):
+    r.set(cookie, user_id, 18000)
+
+
+def get_cookie_id(cookie):
+    if r.exists(cookie):
+        return r.get(cookie)
+    else:
+        return None

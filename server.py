@@ -5,6 +5,7 @@ from routes import error
 import routes.route_index
 import routes.route_todo
 import routes.api_route
+import routes.route_chatroom
 
 
 def obtain_data(connection, ip):
@@ -19,7 +20,6 @@ def obtain_data(connection, ip):
         print('浏览器又蛋疼了')
     else:
         response = response_for_path(rs, ip)
-        # response = response_for_path(rs.decode('utf-8'), ip)
         connection.sendall(response)
     connection.close()
 
@@ -32,7 +32,8 @@ def response_for_path(r, ip):
     us = [
         routes.route_index.route_dict(),
         routes.api_route.route_dict(),
-        routes.route_todo.route_dict()
+        routes.route_todo.route_dict(),
+        routes.route_chatroom.route_dict(),
     ]
     for u in us:
         rs.update(u)

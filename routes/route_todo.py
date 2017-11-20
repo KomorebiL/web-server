@@ -28,7 +28,7 @@ def route_index(requests):
 
 @validate_login
 def api_all(requests):
-    u = obtain_user(requests)[0]
+    u = obtain_user(requests)
     if requests.get('method') == 'GET':
         form = {
             'user_id': u.id,
@@ -43,7 +43,7 @@ def api_all(requests):
 
 @validate_token
 def api_add(requests):
-    u = obtain_user(requests)[0]
+    u = obtain_user(requests)
     if requests.get('method') == 'POST':
         form = {
             'user_id': u.id,
@@ -62,7 +62,7 @@ def api_add(requests):
 
 @validate_token
 def api_update(requests):
-    u = obtain_user(requests)[0]
+    u = obtain_user(requests)
     if requests.get('method') == 'POST':
         id = requests.get('body').get('id')
         state = requests.get('body').get('state')
@@ -80,7 +80,7 @@ def api_update(requests):
 
 @validate_token
 def api_delete(requests):
-    u = obtain_user(requests)[0]
+    u = obtain_user(requests)
     if requests.get('method') == 'POST':
         form = {
             'user_id': u.id,
