@@ -19,14 +19,15 @@ def obtain_data(connection, ip):
     if len(r) <= 0:
         print('浏览器又蛋疼了')
     else:
-        response = response_for_path(rs, ip)
+        response = response_for_path(rs, ip, connection)
         connection.sendall(response)
     connection.close()
 
 
-def response_for_path(r, ip):
+def response_for_path(r, ip, connection):
     requests = request.Request(r)
-    requests.ip = str(ip[0])
+    requests.ip = ip
+    requests.connection = connection
     path = requests.get('path')
     rs = {}
     us = [

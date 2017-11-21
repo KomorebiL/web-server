@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>WebSocket</title>
+    <style>
+        html, body {
+            font: normal 0.9em arial, helvetica;
+        }
+        #log {
+            width: 440px;
+            height: 200px;
+            border: 1px solid #7F9DB9;
+            overflow: auto;
+        }
+        #msg {
+            width: 330px;
+        }
+    </style>
+
+</head>
+<body>
+    <h3>WebSocket</h3>
+    <br><br>
+    <div id="log"></div>
+    <input id="msg" type="text"/>
+    <button>发送</button>
+</body>
+<script>
+    const e = t => document.querySelector(t)
+
+    let socket = new WebSocket("ws://localhost:233/api/chatroom")
+
+    const init = function(socket) {
+        socket.onopen = function (msg) {
+            log('----Hello----World--------')
+        }
+        socket.onmessage = function (msg) {
+            log(msg.data)
+        }
+        socket.onclose = function (msg) {
+            log("Lose Connection!")
+        }
+    }
+
+    const send = function() {
+        let txt = e("#msg").value
+        if (!txt) {
+            return
+        }
+        socket.send(txt)
+        e("#msg").value = ""
+    }
+
+    const quit = function() {
+        window.onbeforeunload = function () {
+            socket.send('quit');
+            socket.close();
+            socket = null;
+        }
+    }
+
+    const log = function(msg) {
+        e("#log").innerHTML += "<br>" + msg;
+    }
+
+    const addEnter = function() {
+        e('#msg').addEventListener('keypress', function(event) {
+            if (event.key == 'Enter') {
+                send()
+            }
+        })
+    }
+
+    const addButtonSend = function() {
+        e('button').addEventListener('click', function() {
+            send()
+        })
+    }
+
+    const main = function() {
+        init(socket)
+        addEnter()
+        addButtonSend()
+        quit()
+    }
+
+    main()
+</script>
+</html>

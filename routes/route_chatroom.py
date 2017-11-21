@@ -1,26 +1,49 @@
-from models.user import User
-from models.todo import Todo
 from routes import (
     response_with_headers,
     obtain_user,
-    error,
     redirect,
     validate_login,
-    validate_login_redirect,
-    validate_token,
     template,
-    json_response,
-    new_token,
+)
+from websocket import (
+    WebSocket,
+    clients,
 )
 
 
+@validate_login
 def api_chatroom(requests):
-    print(requests)
-    return json_response('')
+    b = WebSocket.hand_shaken(requests)
+    username = obtain_user(requests).username
+    WebSocket.send('加入了聊天室', username)
+    if b is False:
+        return bytes(response_with_headers(404), encoding='utf-8')
+    else:
+        while True:
+            r = requests.connection.recv(1024)
+            if WebSocket.decode(r) == 'quit':
+                clients.pop(obtain_user(requests).username)
+                WebSocket.send('退出了聊天室', username)
+                break
+            else:
+                WebSocket.send(r, username)
+        return redirect('/')
+
+
+@validate_login
+def chatroom(_):
+    headers = {
+        'Content-Type': 'text/html',
+    }
+    header = response_with_headers(200, headers)
+    body = template('chatroom')
+    data = header + body
+    return data.encode(encoding='utf-8')
 
 
 def route_dict():
     d = {
         '/api/chatroom': api_chatroom,
+        '/chatroom': chatroom,
     }
     return d

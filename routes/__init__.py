@@ -20,6 +20,7 @@ def error(requests):
 
 def response_with_headers(code, headers=None):
     codes = {
+        101: 'HTTP/1.1 101 Switching Protocols\r\n',
         200: 'HTTP/1.1 200 OK\r\n',
         404: 'HTTP/1.1 404 NOT FOUND\r\n',
         302: 'HTTP/1.1 302\r\n'

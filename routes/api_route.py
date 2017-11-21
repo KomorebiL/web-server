@@ -23,7 +23,7 @@ def api_login(requests):
             u_id = User.find(**user_data)[0].id
             cookie_id = str(uuid4())
             ip_data = {
-                'ip': requests.ip,
+                'ip': str(requests.ip[0]),
             }
             User.update(u_id, ip_data)
             headers = {
@@ -50,7 +50,7 @@ def api_register(requests):
         return error(requests)
 
 
-def api_quit(requests):
+def api_quit(_):
     headers = {
         'Set-cookie': 'session_id={}; path=/'.format('')
     }
@@ -79,7 +79,7 @@ def api_cover(requests):
         return error(requests)
 
 
-def api_favicon(requests):
+def api_favicon(_):
     headers = {
         'Content-Type': 'image/x-icon',
     }
