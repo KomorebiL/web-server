@@ -44,22 +44,42 @@ class WebSocket:
 
     @staticmethod
     def decode(data):
-        if not len(data):
-            return False
-        length = data[1] & 127
-        if length == 126:
-            mask = data[4: 8]
-            raw = data[8:]
-        elif length == 127:
-            mask = data[10: 14]
-            raw = data[14:]
+        en_bytes = b''
+        cn_bytes = []
+        if len(data) < 6:
+            return ''
+        v = data[1] & 0x7f
+        if v == 0x7e:
+            p = 4
+        elif v == 0x7f:
+            p = 10
         else:
-            mask = data[2:6]
-            raw = data[6:]
-        ret = ''
-        for cnt, d in enumerate(raw):
-            ret += chr(d ^ mask[cnt % 4])
-        return ret
+            p = 2
+        mask = data[p:p + 4]
+        data = data[p + 4:]
+        for k, v in enumerate(data):
+            nv = chr(v ^ mask[k % 4])
+            nv_bytes = nv.encode()
+            nv_len = len(nv_bytes)
+            if nv_len == 1:
+                en_bytes += nv_bytes
+            else:
+                en_bytes += b'%s'
+                cn_bytes.append(ord(nv_bytes.decode()))
+        if len(cn_bytes) > 2:
+            cn_str = ''
+            clen = len(cn_bytes)
+            count = int(clen / 3)
+            for x in range(0, count):
+                i = x * 3
+                b = bytes([cn_bytes[i], cn_bytes[i + 1], cn_bytes[i + 2]])
+                cn_str += b.decode()
+            new = en_bytes.replace(b'%s%s%s', b'%s')
+            new = new.decode()
+            res = (new % tuple(list(cn_str)))
+        else:
+            res = en_bytes.decode()
+        return res
 
     @classmethod
     def send(cls, data, username):
