@@ -4,6 +4,7 @@ from routes import (
     redirect,
     validate_login,
     template,
+    route,
 )
 from websocket import (
     WebSocket,
@@ -11,6 +12,7 @@ from websocket import (
 )
 
 
+@route('/api/chatroom')
 @validate_login
 def api_chatroom(requests):
     b = WebSocket.hand_shaken(requests)
@@ -30,6 +32,7 @@ def api_chatroom(requests):
         return redirect('/')
 
 
+@route('/chatroom')
 @validate_login
 def chatroom(_):
     headers = {
@@ -39,11 +42,3 @@ def chatroom(_):
     body = template('chatroom')
     data = header + body
     return data.encode(encoding='utf-8')
-
-
-def route_dict():
-    d = {
-        '/api/chatroom': api_chatroom,
-        '/chatroom': chatroom,
-    }
-    return d

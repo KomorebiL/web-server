@@ -3,12 +3,21 @@ from models.user import User
 import json
 import redis
 import uuid
+from functools import wraps
 
 
 r = redis.StrictRedis(charset="utf-8", decode_responses=True)
+url_dict = {}
 
 
-def error(requests):
+def route(path):
+    def func(f):
+        url_dict[path] = f
+        return f
+    return func
+
+
+def error(_):
     headers = {
         'Content-Type': 'text/html',
     }
@@ -23,7 +32,7 @@ def response_with_headers(code, headers=None):
         101: 'HTTP/1.1 101 Switching Protocols\r\n',
         200: 'HTTP/1.1 200 OK\r\n',
         404: 'HTTP/1.1 404 NOT FOUND\r\n',
-        302: 'HTTP/1.1 302\r\n'
+        302: 'HTTP/1.1 302\r\n',
     }
     header = codes[code]
     if headers is not None:
@@ -34,6 +43,7 @@ def response_with_headers(code, headers=None):
 
 
 def validate_login(f):
+    @wraps(f)
     def vailedate(requests):
         u = obtain_user(requests)
         if u is not None:
@@ -44,6 +54,7 @@ def validate_login(f):
 
 
 def validate_login_redirect(f):
+    @wraps(f)
     def vailedate(requests):
         u = obtain_user(requests)
         if u is not None:
@@ -104,6 +115,7 @@ def template(name, **kwargs):
     return data
 
 
+@route('/cover')
 def cover(requests):
     cover_name = requests.query.get('img', None)
     if cover_name is None:
@@ -120,6 +132,7 @@ def cover(requests):
             return data
 
 
+@route('/static')
 def static(requests):
     file_name = requests.query.get('file', None)
     if file_name is None:

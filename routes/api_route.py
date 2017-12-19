@@ -9,9 +9,11 @@ from routes import (
     set_cookie,
     validate_login,
     response_with_headers,
+    route,
 )
 
 
+@route('/api/login')
 def api_login(requests):
     if requests.get('method') == 'POST':
         b = requests.body
@@ -27,7 +29,7 @@ def api_login(requests):
             }
             User.update(u_id, ip_data)
             headers = {
-                'Set-cookie': 'session_id={}; path=/; httponly=true;'.format(cookie_id)
+                'Set-cookie': 'session_id={}; path=/; httponly=true;'.format(cookie_id),
             }
             set_cookie(cookie_id, u_id)
             return redirect('/', headers)
@@ -37,6 +39,7 @@ def api_login(requests):
         return error(requests)
 
 
+@route('/api/register')
 def api_register(requests):
     if requests.get('method') == 'POST':
         b = requests.body
@@ -50,6 +53,7 @@ def api_register(requests):
         return error(requests)
 
 
+@route('/api/quit')
 def api_quit(_):
     headers = {
         'Set-cookie': 'session_id={}; path=/'.format('')
@@ -57,6 +61,7 @@ def api_quit(_):
     return redirect('/', headers)
 
 
+@route('/api/add_head')
 @validate_login
 def api_cover(requests):
     if requests.get('method') == 'POST':
@@ -79,6 +84,7 @@ def api_cover(requests):
         return error(requests)
 
 
+@route('/favicon.ico')
 def api_favicon(_):
     headers = {
         'Content-Type': 'image/x-icon',
@@ -87,16 +93,3 @@ def api_favicon(_):
         header = response_with_headers(200, headers)
         data = bytes(header, encoding="utf-8") + f.read()
         return data
-
-
-def route_dict():
-    d = {
-        '/api/login': api_login,
-        '/api/register': api_register,
-        '/api/quit': api_quit,
-        '/api/add_head': api_cover,
-        '/favicon.ico': api_favicon,
-        '/cover': cover,
-        '/static': static,
-    }
-    return d

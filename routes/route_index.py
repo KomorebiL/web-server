@@ -7,9 +7,11 @@ from routes import (
     validate_login,
     template,
     validate_login_redirect,
+    route,
 )
 
 
+@route('/')
 @validate_login
 def route_index(requests):
     headers = {
@@ -22,8 +24,9 @@ def route_index(requests):
     return data.encode(encoding='utf-8')
 
 
+@route('/login')
 @validate_login_redirect
-def route_login(requests):
+def route_login(_):
     headers = {
         'Content-Type': 'text/html',
     }
@@ -33,8 +36,9 @@ def route_login(requests):
     return data.encode(encoding='utf-8')
 
 
+@route('/register')
 @validate_login_redirect
-def route_register(requests):
+def route_register(_):
     headers = {
         'Content-Type': 'text/html',
     }
@@ -42,12 +46,3 @@ def route_register(requests):
     body = template('register')
     data = header + body
     return data.encode(encoding='utf-8')
-
-
-def route_dict():
-    d = {
-        '/': route_index,
-        '/login': route_login,
-        '/register': route_register,
-    }
-    return d

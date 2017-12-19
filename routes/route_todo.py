@@ -11,9 +11,11 @@ from routes import (
     template,
     json_response,
     new_token,
+    route,
 )
 
 
+@route('/todo')
 @validate_login
 def route_index(requests):
     headers = {
@@ -26,6 +28,7 @@ def route_index(requests):
     return data.encode(encoding='utf-8')
 
 
+@route('/api/todo/all')
 @validate_login
 def api_all(requests):
     u = obtain_user(requests)
@@ -41,6 +44,7 @@ def api_all(requests):
         return error(requests)
 
 
+@route('/api/todo/add')
 @validate_token
 def api_add(requests):
     u = obtain_user(requests)
@@ -60,6 +64,7 @@ def api_add(requests):
         return error(requests)
 
 
+@route('/api/todo/update')
 @validate_token
 def api_update(requests):
     u = obtain_user(requests)
@@ -78,6 +83,7 @@ def api_update(requests):
         return error(requests)
 
 
+@route('/api/todo/delete')
 @validate_token
 def api_delete(requests):
     u = obtain_user(requests)
@@ -93,14 +99,3 @@ def api_delete(requests):
         return json_response(data)
     else:
         return error(requests)
-
-
-def route_dict():
-    d = {
-        '/todo': route_index,
-        '/api/todo/add': api_add,
-        '/api/todo/delete': api_delete,
-        '/api/todo/all': api_all,
-        '/api/todo/update': api_update,
-    }
-    return d

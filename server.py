@@ -1,7 +1,10 @@
 import socket
 import request
 import _thread
-from routes import error
+from routes import (
+    error,
+    url_dict,
+)
 import routes.route_index
 import routes.route_todo
 import routes.api_route
@@ -29,16 +32,7 @@ def response_for_path(r, ip, connection):
     requests.ip = ip
     requests.connection = connection
     path = requests.get('path')
-    rs = {}
-    us = [
-        routes.route_index.route_dict(),
-        routes.api_route.route_dict(),
-        routes.route_todo.route_dict(),
-        routes.route_chatroom.route_dict(),
-    ]
-    for u in us:
-        rs.update(u)
-    route = rs.get(path, error)
+    route = url_dict.get(path, error)
     return route(requests)
 
 
