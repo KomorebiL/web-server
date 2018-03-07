@@ -4,6 +4,7 @@ import json
 import redis
 import uuid
 from functools import wraps
+from gzip import compress
 
 
 r = redis.StrictRedis(charset="utf-8", decode_responses=True)
@@ -124,11 +125,14 @@ def cover(requests):
         postfix = cover_name.split('.', 1)[1]
         path = 'covers/' + cover_name
         headers = {
-            'Content-Type': 'image/{}'.format(postfix)
+            'Content-Type': 'image/{}'.format(postfix),
+            'Content-Encoding': 'gzip',
         }
+        if 'gzip' in requests.headers['Accept-Encoding']:
+            headers['Content-Encoding'] = 'gzip'
         with open(path, 'rb') as f:
             header = response_with_headers(200, headers)
-            data = bytes(header, encoding="utf-8") + f.read()
+            data = bytes(header, encoding="utf-8") + compress(f.read()) if 'Content-Encoding' in headers else f.read()
             return data
 
 
@@ -172,3 +176,4 @@ def get_cookie_id(cookie):
         return r.get(cookie)
     else:
         return None
+
