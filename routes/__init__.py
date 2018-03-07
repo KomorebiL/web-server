@@ -5,6 +5,7 @@ import redis
 import uuid
 from functools import wraps
 from gzip import compress
+from hashlib import md5
 
 
 r = redis.StrictRedis(charset="utf-8", decode_responses=True)
@@ -34,6 +35,7 @@ def response_with_headers(code, headers=None):
         200: 'HTTP/1.1 200 OK\r\n',
         404: 'HTTP/1.1 404 NOT FOUND\r\n',
         302: 'HTTP/1.1 302\r\n',
+        304: 'HTTP/1.1 304\r\n',
     }
     header = codes[code]
     if headers is not None:
@@ -126,13 +128,19 @@ def cover(requests):
         path = 'covers/' + cover_name
         headers = {
             'Content-Type': 'image/{}'.format(postfix),
-            'Content-Encoding': 'gzip',
         }
         if 'gzip' in requests.headers['Accept-Encoding']:
             headers['Content-Encoding'] = 'gzip'
         with open(path, 'rb') as f:
-            header = response_with_headers(200, headers)
-            data = bytes(header, encoding="utf-8") + compress(f.read()) if 'Content-Encoding' in headers else f.read()
+            read_file = f.read()
+            hash_value = md5(read_file).hexdigest()
+            if 'If-None-Match' in requests.headers and hash_value == requests.headers['If-None-Match']:
+                header = response_with_headers(304, headers)
+                data = bytes(header, encoding="utf-8")
+            else:
+                headers['ETag'] = hash_value
+                header = response_with_headers(200, headers)
+                data = bytes(header, encoding="utf-8") + compress(read_file) if 'Content-Encoding' in headers else read_file
             return data
 
 
